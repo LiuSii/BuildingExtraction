@@ -16,7 +16,7 @@ def k_means(image, k):
     # 转换为float类型
     data = np.float32(img_shape)
     # 定义标准、K值
-    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    criteria = (cv.TERM_CRITERIA_EPS, 10, 10.0)
     # 调用k_means函数
     ret, label, center = cv.kmeans(data, k, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
 
@@ -29,13 +29,14 @@ def k_means(image, k):
 
 
 def translate(image, src_image):
-    # 去除阴影，所有像素遍历，近黑色转为黑色，其他转为白色，与源图像srcIamge作加处理，实现将阴影变为白色
+    # 去除阴影，所有像素遍历，黑白反转，与源图像srcIamge作加处理，实现将阴影变为白色
+    # 第一个输入为反转图像，第二个为源图像
 
     # 遍历将图转为二值
     h, w, c = image.shape
     for row in range(h):
         for col in range(w):
-             if (image[row, col, 0] < 60) & (image[row, col, 1] < 60) & (image[row, col, 2] < 60):
+             if image[row, col, 0] == 0:
                 image[row, col, 0] = 255
                 image[row, col, 1] = 255
                 image[row, col, 2] = 255
@@ -48,3 +49,22 @@ def translate(image, src_image):
     f_image = cv.add(image, src_image)
 
     return f_image
+
+
+def canny(img):
+    # canny边缘检测
+
+    # 高斯模糊
+    blurred = cv.GaussianBlur(img, (3, 3), 0)
+    # 灰度图
+    # gray = cv.cvtColor(blurred, cv.COLOR_RGB2GRAY)
+    # 计算x、y方向梯度
+    x_grad = cv.Sobel(blurred, cv.CV_16SC1, 1, 0)
+    y_grad = cv.Sobel(blurred, cv.CV_16SC1, 0, 1)
+    # canny边缘检测
+    edge = cv.Canny(x_grad, y_grad, 50, 100)
+
+    # 在原图基础上显示
+    dst = cv.bitwise_and(img, img, mask=edge)
+
+    return edge, dst
