@@ -68,3 +68,35 @@ def canny(img):
     dst = cv.bitwise_and(img, img, mask=edge)
 
     return edge, dst
+
+
+# 颜色区域提取
+def color_area_red(self):
+    # 提取红色区域(暂定框的颜色为红色)
+
+    low_red = np.array([50, 60, 100])  # 为bgr
+    high_red = np.array([85, 130, 180])
+    mask = cv.inRange(self, low_red, high_red)
+    red = cv.bitwise_and(self, self, mask=mask)
+    return red
+
+
+def color_area_blue(self):
+    # 提取蓝色区域(暂定框的颜色为蓝色)
+
+    low_red = np.array([90, 90, 60])  # 为bgr
+    high_red = np.array([255, 220, 200])
+    mask = cv.inRange(self, low_red, high_red)
+    red = cv.bitwise_and(self, self, mask=mask)
+    return red
+
+
+def max_b(image):
+    # 取b值最大区域
+
+    h, w, c = image.shape
+    for row in range(h):
+        for col in range(w):
+            if (image[row, col, 0] < image[row, col, 1] + 20) | (image[row, col, 0] < image[row, col, 2] + 20):  # 判断是否B最大且大一部分
+                image[row, col, 0] = image[row, col, 1] = image[row, col, 2] = 0
+    return image
