@@ -16,7 +16,7 @@ img = IO.img_in("../NotPush/map.jpg")
 IO.img_out("original", img)
 
 # k_means实现
-k_img = Deal.k_means(img, 3)
+k_img = Deal.k_means(img, 2)
 IO.img_out("k_means", k_img)
 
 # 二值化
@@ -27,13 +27,13 @@ IO.img_out("shadow_2value", shadow_2value)
 NoShadow_img = Deal.translate(shadow_2value, img)
 IO.img_out("NoShadow_img", NoShadow_img)
 
-# 流出RGB中偏蓝色的区域
-test = Deal.color_area_blue(NoShadow_img)
-IO.img_out("test", test)
-
-# 保留B值最大的区域
-test_b = Deal.max_b(test)
-IO.img_out("test_b", test_b)
+# # 流出RGB中偏蓝色的区域
+# test = Deal.color_area_blue(NoShadow_img)
+# IO.img_out("test", test)
+#
+# # 保留B值最大的区域
+# test_b = Deal.max_b(test)
+# IO.img_out("test_b", test_b)
 
 # 输出一个图像
 # cv.imwrite("../NotPush/out1.jpg", NoShadow_img)
@@ -44,21 +44,25 @@ IO.img_out("test_b", test_b)
 # IO.img_out("g", g)
 # IO.img_out("b", b)
 
-# # 转为hsv
-# hsv = cv.cvtColor(NoShadow_img, cv.COLOR_RGB2HSV)
+# 转为hsv
+hsv = cv.cvtColor(NoShadow_img, cv.COLOR_RGB2HSV)
+
+IO.img_out("hsv", hsv)
+V, S, H = Deal.split(hsv)
+IO.img_out("H", H)
+IO.img_out("S", S)
+IO.img_out("V", V)
+
+
+# # 转灰度图
+# test_gray = cv.cvtColor(test_b, cv.COLOR_RGB2GRAY)
 #
-# IO.img_out("hsv", hsv)
-# V, S, H = Deal.split(hsv)
-# # IO.img_out("H", H)
-# IO.img_out("S", S)
-# # IO.img_out("V", V)
-#
-# # 将S图二值化
-# ret1, _2value = cv.threshold(S, 110, 255, cv.THRESH_BINARY)
+# # 将图二值化
+# ret1, _2value = cv.threshold(test_gray, 110, 255, cv.THRESH_BINARY)
 # IO.img_out("2value", _2value)
-# #
-# # 对二值化的S图进行开运算
-# kernel = cv.getStructuringElement(cv.MORPH_RECT, (3, 3))
+#
+# # 对二值化的图进行开运算
+# kernel = cv.getStructuringElement(cv.MORPH_RECT, (5, 5))
 # opened = cv.morphologyEx(_2value, cv.MORPH_OPEN, kernel)
 # IO.img_out("Open", opened)
 #

@@ -97,6 +97,6 @@ def max_b(image):
     h, w, c = image.shape
     for row in range(h):
         for col in range(w):
-            if (image[row, col, 0] < image[row, col, 1] + 20) | (image[row, col, 0] < image[row, col, 2] + 20):  # 判断是否B最大且大一部分
+            if (image[row, col, 0] < image[row, col, 1] + 5) | (image[row, col, 0] < image[row, col, 2] + 5):  # 判断是否B最大且大一部分
                 image[row, col, 0] = image[row, col, 1] = image[row, col, 2] = 0
     return image
