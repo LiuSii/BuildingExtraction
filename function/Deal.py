@@ -15,7 +15,7 @@ def k_means(image, k):
     img_shape = image.reshape((-1, 3))
     # 转换为float类型
     data = np.float32(img_shape)
-    # 定义标准、K值
+    # 定义标准
     criteria = (cv.TERM_CRITERIA_EPS, 10, 10.0)
     # 调用k_means函数
     ret, label, center = cv.kmeans(data, k, None, criteria, 10, cv.KMEANS_RANDOM_CENTERS)
@@ -34,6 +34,7 @@ def translate(image, src_image):
 
     # 遍历将图转为二值
     h, w, c = image.shape
+    print(image.shape)
     for row in range(h):
         for col in range(w):
              if image[row, col, 0] == 0:
@@ -47,6 +48,8 @@ def translate(image, src_image):
 
     # 与源图像进行加处理
     f_image = cv.add(image, src_image)
+    print(image.shape)
+    print(src_image.shape)
 
     return f_image
 
