@@ -4,27 +4,23 @@
 
 """
 import cv2 as cv
-import numpy as np
 
 # 导入其他文件函数库
 from function import IO
 from function import Deal
 
-# ----------------------输入输出原图----------------------
+"""----------------------输入输出原图----------------------"""
 # src = IO.img_in("./resources/map2.jpg")  # 测试图
-src = IO.img_in("../NotPush/map.jpg")
+src = IO.img_in("../NotPush/map2.jpg")
 IO.img_out("original", src)
 
-# ---------------------消除绿植和阴影---------------------
+"""---------------------消除绿植和阴影---------------------"""
 # 转为hsv
 hsv = cv.cvtColor(src, cv.COLOR_RGB2HSV)
 
 # 突出显示H值
-h, w = hsv.shape[:2]
-for i in range(h):
-    for j in range(w):
-        hsv[i, j, 0] = 255
-# IO.img_out("H", hsv)
+hsv = Deal.show_value(hsv, 0)  # hsv图像0取H值
+# IO.img_out("hsv", hsv)
 
 # k_means实现
 k_img = Deal.k_means(hsv, 2)
@@ -34,7 +30,7 @@ k_img = Deal.k_means(hsv, 2)
 k_img_gray = cv.cvtColor(k_img, cv.COLOR_RGB2GRAY)
 # IO.img_out("gray", k_img_gray)
 print(k_img_gray)
-ret0, shadow_2value = cv.threshold(k_img_gray, 130, 255, cv.THRESH_BINARY_INV)
+ret0, shadow_2value = cv.threshold(k_img_gray, 140, 255, cv.THRESH_BINARY_INV)  # 其中阈值在map2中取112到151之间的值，如140
 
 # 转回三通道
 shadow = cv.cvtColor(shadow_2value, cv.COLOR_GRAY2RGB)
@@ -44,13 +40,32 @@ shadow = cv.cvtColor(shadow_2value, cv.COLOR_GRAY2RGB)
 NoShadowImg = cv.bitwise_and(shadow, src)
 IO.img_out("NoShadow", NoShadowImg)
 
-# -----------------------求初始曲线-----------------------
+"""-----------------------求初始曲线-----------------------"""
+# 输出rgb
+r, g, b = Deal.split(NoShadowImg)
+IO.img_out("r", r)
+IO.img_out("g", g)
+IO.img_out("b", b)
+
 # 转为hsv
 NS_hsv = cv.cvtColor(NoShadowImg, cv.COLOR_RGB2HSV)
-IO.img_out("NS_hsv", NS_hsv)
+# IO.img_out("NS_hsv", NS_hsv)
+# 输出hsv
+v, s, h = Deal.split(NS_hsv)
+IO.img_out("h", h)
+IO.img_out("s", s)
+IO.img_out("v", v)
 
-h, s, v = Deal.split(NS_hsv)
-IO.img_out("S", s)
+# # 突出显示HSV值
+# IO.img_out("H2", Deal.show_value(NS_hsv, 0))
+# IO.img_out("S2", Deal.show_value(NS_hsv, 1))
+# IO.img_out("V2", Deal.show_value(NS_hsv, 2))
+
+# 显示hsv直方图
+Deal.image_hist(NS_hsv, shadow_2value)
+# 显示RGB直方图
+Deal.image_hist(src, shadow_2value)
+
 
 # # 流出RGB中偏蓝色的区域
 # test = Deal.color_area_blue(NoShadow_img)
@@ -62,12 +77,6 @@ IO.img_out("S", s)
 
 # 输出一个图像
 # cv.imwrite("../NotPush/out1.jpg", NoShadow_img)
-
-# # 输出rgb
-# r, g, b = Deal.split(img)
-# IO.img_out("r", r)
-# IO.img_out("g", g)
-# IO.img_out("b", b)
 
 # # 转灰度图
 # test_gray = cv.cvtColor(test_b, cv.COLOR_RGB2GRAY)

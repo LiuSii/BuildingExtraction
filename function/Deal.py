@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 def split(image):
@@ -95,7 +96,9 @@ def color_area_blue(self):
 
 
 def max_b(image):
-    # 取b值最大区域
+    """
+        取b值最大区域
+    """
 
     h, w, c = image.shape
     for row in range(h):
@@ -103,3 +106,33 @@ def max_b(image):
             if (image[row, col, 0] < image[row, col, 1] + 5) | (image[row, col, 0] < image[row, col, 2] + 5):  # 判断是否B最大且大一部分
                 image[row, col, 0] = image[row, col, 1] = image[row, col, 2] = 0
     return image
+
+
+def show_value(image, n):
+    """
+        突出显示某值
+        R、G、B的n值分别为2、1、0；H、S、V的n值分别为0、1、2
+    """
+
+    h, w = image.shape[:2]
+    for i in range(h):
+        for j in range(w):
+            image[i, j, n] = 255
+    return image
+
+
+def image_hist(image, masks):
+    """
+        绘制三通道直方图
+        其中RGB的直方图分别为红绿蓝色；HSV的直返图分别为蓝绿红色
+        :param image: 三通道图像
+        :return: 直接绘制
+    """
+
+    # 绘制的颜色
+    colors = ('blue', 'green', 'red')
+    for i, color in enumerate(colors):
+        hist = cv.calcHist([image], [i], masks, [256], [0, 256])
+        plt.plot(hist, color=color)
+        plt.xlim([0, 256])
+    plt.show()
