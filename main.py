@@ -1,7 +1,6 @@
 """
     毕业设计
     基于主动轮廓的卫星图像建筑物提取
-
 """
 import cv2 as cv
 
@@ -11,7 +10,7 @@ from function import Deal
 
 """----------------------输入输出原图----------------------"""
 # src = IO.img_in("./resources/map2.jpg")  # 测试图
-src = IO.img_in("../NotPush/map2.jpg")
+src = IO.img_in("../NotPush/map3.jpg")
 IO.img_out("original", src)
 
 """---------------------消除绿植和阴影---------------------"""
@@ -42,29 +41,34 @@ IO.img_out("NoShadow", NoShadowImg)
 
 """-----------------------求初始曲线-----------------------"""
 # 输出rgb
-r, g, b = Deal.split(NoShadowImg)
-IO.img_out("r", r)
-IO.img_out("g", g)
-IO.img_out("b", b)
+# r, g, b = Deal.split(NoShadowImg)
+# IO.img_out("r", r)
+# IO.img_out("g", g)
+# IO.img_out("b", b)
 
 # 转为hsv
 NS_hsv = cv.cvtColor(NoShadowImg, cv.COLOR_RGB2HSV)
 # IO.img_out("NS_hsv", NS_hsv)
 # 输出hsv
 v, s, h = Deal.split(NS_hsv)
-IO.img_out("h", h)
+# IO.img_out("h", h)
 IO.img_out("s", s)
-IO.img_out("v", v)
+# IO.img_out("v", v)
 
-# # 突出显示HSV值
+# s值二值化
+print(s)
+ret1, s_2value = cv.threshold(s, 80, 255, cv.THRESH_BINARY_INV)  # 其中阈值在map2中取112到151之间的值，如140
+cv.imshow("s_2value", s_2value)
+
+# 突出显示HSV值
 # IO.img_out("H2", Deal.show_value(NS_hsv, 0))
 # IO.img_out("S2", Deal.show_value(NS_hsv, 1))
 # IO.img_out("V2", Deal.show_value(NS_hsv, 2))
 
 # 显示hsv直方图
-Deal.image_hist(NS_hsv, shadow_2value)
+# Deal.image_hist(NS_hsv, shadow_2value)
 # 显示RGB直方图
-Deal.image_hist(src, shadow_2value)
+# Deal.image_hist(src, shadow_2value)
 
 
 # # 流出RGB中偏蓝色的区域
