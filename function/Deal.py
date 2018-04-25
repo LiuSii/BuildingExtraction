@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
+from function.Algo import Point
 
 
 def split(image):
@@ -136,3 +137,38 @@ def image_hist(image, masks):
         plt.plot(hist, color=color)
         plt.xlim([0, 256])
     plt.show()
+
+
+def point_out(point):
+    """
+    输出point类点的各值
+    :param point: point类
+    :return: 无
+    """
+    print("x:%s, y:%s, value:%s, group:%s" % (point.x, point.y, point.value, point.group))
+
+
+def to_binary(img, flag):
+    """
+    将聚类结果变为二值化（当k值为2时）
+    :param img: kmeans后的结果
+    :param flag: 需要反转标志位，为0时不需要，为1时需要
+    :return: 黑白二值化
+    """
+    width, height = img.shape  # 获取长宽
+
+    # 判断标志位
+    if flag == 0:
+        swallow = 255
+        deep = 0
+    else:
+        swallow = 0
+        deep = 255
+
+    for w in range(width):  # 遍历每一个点
+        for h in range(height):
+            if img[w][h] == 2:
+                img[w][h] = deep
+            else:
+                img[w][h] = swallow
+    return img
