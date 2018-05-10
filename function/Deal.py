@@ -25,7 +25,7 @@ def k_means(image, k):
     # 转回uint8格式，恢复图像
     center = np.uint8(center)
     k_img_ori = center[label.flatten()]
-    k_img = k_img_ori.reshape((image.shape))
+    k_img = k_img_ori.reshape(image.shape)
 
     return k_img
 
@@ -39,11 +39,11 @@ def translate(image, src_image):
     print(image.shape)
     for row in range(h):
         for col in range(w):
-             if image[row, col, 0] == 0:
+            if image[row, col, 0] == 0:
                 image[row, col, 0] = 255
                 image[row, col, 1] = 255
                 image[row, col, 2] = 255
-             else:
+            else:
                 image[row, col, 0] = 0
                 image[row, col, 1] = 0
                 image[row, col, 2] = 0
@@ -100,11 +100,11 @@ def max_b(image):
     """
         取b值最大区域
     """
-
     h, w, c = image.shape
     for row in range(h):
         for col in range(w):
-            if (image[row, col, 0] < image[row, col, 1] + 5) | (image[row, col, 0] < image[row, col, 2] + 5):  # 判断是否B最大且大一部分
+            # 判断是否B最大且大一部分
+            if (image[row, col, 0] < image[row, col, 1] + 5) | (image[row, col, 0] < image[row, col, 2] + 5):
                 image[row, col, 0] = image[row, col, 1] = image[row, col, 2] = 0
     return image
 
@@ -172,3 +172,92 @@ def to_binary(img, flag):
             else:
                 img[w][h] = swallow
     return img
+
+
+def contours_to_roi(img, contour):
+    """
+    获取一个轮廓曲线的原图ROI区域
+    :param img: 原图
+    :param contour: 轮廓
+    :return: ROI区域和已经消去的轮廓和x、y偏移值
+    """
+    # 求得上下左右最大边界，其中位置为：
+    #     ...........top...........
+    #     .                       .
+    #   left                    right
+    #     .                       .
+    #     ...........down..........
+    # 初始化为第一个点的值
+    left = right = contour[0][0][0]
+    top = down = contour[0][0][1]
+
+    # 遍历获得四个角点，其中contour[i][0][0]表示横坐标，contour[i][0][1]表示纵坐标
+    for i in range(len(contour)):
+        # 更新角点
+        if contour[i][0][0] < left:
+            left = contour[i][0][0]
+        elif contour[i][0][0] > right:
+            right = contour[i][0][0]
+        if contour[i][0][1] > down:
+            down = contour[i][0][1]
+        elif contour[i][0][1] < top:
+            top = contour[i][0][1]
+    # 消去轮廓
+    for i in range(len(contour)):
+        # 挨个减去最左最上值
+        contour[i][0][0] = contour[i][0][0] - left
+        contour[i][0][1] = contour[i][0][1] - top
+
+    # ROI区域稍微放大，而且要避免越界
+    # if left - 5 < 0:  # 先来5个像素的
+    #     left = 0
+    # else:
+    #     left = left - 5
+    #
+    # if top - 5 < 0:  # 先来5个像素的
+    #     top = 0
+    # else:
+    #     top = top - 5
+    #
+    # if right + 5 > img.shape[1]:  # 先来5个像素的
+    #     right = img.shape[1]
+    # else:
+    #     right = right + 5
+    #
+    # if down + 5 > img.shape[0]:  # 先来5个像素的
+    #     down = img.shape[0]
+    # else:
+    #     down = down + 5
+
+    # bug记录4：直接给img取ROI时先是纵坐标再是横坐标
+    img_roi = img[top:down, left:right].copy()
+    # 以四个角点返回roi区域
+    return img_roi, contour, left, top
+
+
+def contours_to_area(roi, contour):
+    """
+    将获取到的ROI区域进行填充，并且消除细小轮廓，返回一个包括该轮廓的ROI
+    :param roi:轮廓的ROI区域
+    :param contour:提取到的轮廓
+    :return:进行填充
+    """
+    # 对于轮廓进行消除或者填充
+    area = cv.contourArea(contour)  # 计算区域面积
+    height, width, channels = roi.shape  # 获得高和宽
+    shadow = np.zeros([height, width], np.uint8)
+
+    # 处理过小面积或者进行填充
+    if area < 30:  # 先试一下
+        c_min = []  # 消除参数
+        # thickness为-1时表示填充，填充为黑色表示消除
+
+        c_min.append(contour)
+        cv.drawContours(shadow, c_min, -1, (0, 0, 0), thickness=-1)
+    else:
+        c_max = []
+        # 轮廓填充为白色
+        c_max.append(contour)
+        cv.drawContours(shadow, c_max, -1, (255, 255, 255), thickness=-1)
+
+    return shadow
